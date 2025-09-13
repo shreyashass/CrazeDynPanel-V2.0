@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Login - CrazeDynPanel v2.0{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center">
+    <div class="glass-card p-8 max-w-md w-full mx-4">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold neon-text mb-2">CrazeDynPanel v2.0</h1>
+            <p class="text-gray-400">Professional Server Management • Premium Edition</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-3 rounded-lg {% if category == 'error' %}bg-red-900 border-red-700 text-red-300{% else %}bg-green-900 border-green-700 text-green-300{% endif %} border">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    <i class="fas fa-envelope mr-2"></i>Admin Email
+                </label>
+                <input type="email" name="email" required 
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                       placeholder="Enter your admin email">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    <i class="fas fa-lock mr-2"></i>Password
+                </label>
+                <input type="password" name="password" required 
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                       placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="w-full btn-primary py-3">
+                <i class="fas fa-sign-in-alt mr-2"></i>Access Panel
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs text-gray-500">
+            <p>🔐 Secure access required • Made by Zerobrine</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-focus email field
+    document.querySelector('input[name="email"]').focus();
+</script>
+{% endblock %}

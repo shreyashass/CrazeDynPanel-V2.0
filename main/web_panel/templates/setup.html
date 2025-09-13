@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Initial Setup - CrazeDynPanel v2.0{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center">
+    <div class="glass-card p-8 max-w-lg w-full mx-4">
+        <div class="text-center mb-8">
+            <div class="text-6xl mb-4">🚀</div>
+            <h1 class="text-3xl font-bold neon-text mb-2">Welcome to CrazeDynPanel v2.0!</h1>
+            <p class="text-gray-400">Let's set up your admin account</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-3 rounded-lg {% if category == 'error' %}bg-red-900 border-red-700 text-red-300{% else %}bg-green-900 border-green-700 text-green-300{% endif %} border">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    <i class="fas fa-envelope mr-2"></i>Admin Email
+                </label>
+                <input type="email" name="email" required 
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                       placeholder="admin@yourserver.com">
+                <p class="text-xs text-gray-500 mt-1">This will be your login username</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    <i class="fas fa-lock mr-2"></i>Admin Password
+                </label>
+                <input type="password" name="password" required minlength="8"
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                       placeholder="Create a strong password">
+                <p class="text-xs text-gray-500 mt-1">Minimum 8 characters, use letters, numbers & symbols</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2 text-gray-300">
+                    <i class="fas fa-shield-alt mr-2"></i>Confirm Password
+                </label>
+                <input type="password" name="confirm_password" required minlength="8"
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                       placeholder="Confirm your password">
+            </div>
+
+            <div class="bg-blue-900 bg-opacity-30 border border-blue-500 border-opacity-30 rounded-lg p-4">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
+                    <div class="text-sm text-blue-300">
+                        <p class="font-semibold mb-2">🔐 Security Notice:</p>
+                        <ul class="space-y-1 text-xs">
+                            <li>• Your credentials are encrypted and stored locally</li>
+                            <li>• Only you will have access to this admin panel</li>
+                            <li>• Keep your login details secure and private</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full btn-primary py-3 text-lg font-semibold">
+                <i class="fas fa-rocket mr-2"></i>Complete Setup & Login
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-xs text-gray-500">
+            <p>🎮 CrazeDynPanel v2.0 • Made by Zerobrine</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-focus email field
+    document.querySelector('input[name="email"]').focus();
+    
+    // Password strength indicator
+    const password = document.querySelector('input[name="password"]');
+    const confirm = document.querySelector('input[name="confirm_password"]');
+    
+    confirm.addEventListener('input', function() {
+        if (this.value && password.value !== this.value) {
+            this.setCustomValidity('Passwords do not match');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    password.addEventListener('input', function() {
+        if (confirm.value && this.value !== confirm.value) {
+            confirm.setCustomValidity('Passwords do not match');
+        } else {
+            confirm.setCustomValidity('');
+        }
+    });
+</script>
+{% endblock %}

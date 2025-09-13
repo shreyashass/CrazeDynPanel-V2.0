@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}CrazeDynPanel v2.0 - Professional Server Manager{% endblock %}</title>
+    
+    <!-- Futuristic CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CrazeDynPanel v2.0 Professional Icon System -->
+    <link href="/static/css/icons.css" rel="stylesheet">
+    
+    <!-- Custom Futuristic Styles -->
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-purple: #b829ff;
+            --dark-bg: #0a0a0f;
+            --card-bg: #1a1a2e;
+            --hover-bg: #16213e;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #16213e 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #e6e6e6;
+            min-height: 100vh;
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .neon-text {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .status-online {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+        }
+
+        .status-starting {
+            background: linear-gradient(45deg, #ffa502, #ffb142);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--card-bg) 0%, var(--dark-bg) 100%);
+            border-right: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .stats-widget {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(184, 41, 255, 0.1) 100%);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .console-output {
+            background: #0a0a0a;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <nav class="sidebar fixed left-0 top-0 h-full w-64 p-6 z-40">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold neon-text">
+                <i class="fas fa-rocket mr-2"></i>
+                CrazeDynPanel v2.0
+            </h1>
+            <p class="text-xs text-gray-500">Made by Zerobrine</p>
+            <p class="text-sm text-gray-400">Professional Server Manager</p>
+            <div class="mt-2 space-y-1">
+                <p class="text-xs text-blue-400">🔗 dc.gg/zerocloud</p>
+                <p class="text-xs text-red-400">📺 @Zerobrine_7</p>
+            </div>
+        </div>
+
+        <ul class="space-y-2">
+            <li>
+                <a href="/" class="nav-item flex items-center p-3 rounded-lg transition-all">
+                    <img src="/static/icons/menu/dashboard.png" alt="Dashboard" class="w-5 h-5 mr-3" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                    <i class="fas fa-tachometer-alt mr-3" style="display: none;"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="/servers" class="nav-item flex items-center p-3 rounded-lg transition-all">
+                    <img src="/static/icons/menu/server_management.png" alt="Servers" class="w-5 h-5 mr-3" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                    <i class="fas fa-server mr-3" style="display: none;"></i>
+                    Servers
+                </a>
+            </li>
+            <li>
+                <a href="/plugins" class="nav-item flex items-center p-3 rounded-lg transition-all">
+                    <img src="/static/icons/menu/plugins.png" alt="Plugins" class="w-5 h-5 mr-3" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                    <i class="fas fa-puzzle-piece mr-3" style="display: none;"></i>
+                    Plugins
+                </a>
+            </li>
+            <li>
+                <a href="/settings" class="nav-item flex items-center p-3 rounded-lg transition-all">
+                    <img src="/static/icons/menu/settings.png" alt="Settings" class="w-5 h-5 mr-3" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+                    <i class="fas fa-cogs mr-3" style="display: none;"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+
+        <div class="absolute bottom-6 left-6 right-6">
+            <div class="stats-widget p-4 rounded-lg">
+                <h3 class="text-sm font-semibold mb-2">System Stats</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span>CPU</span>
+                        <span id="cpu-usage">0%</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span>RAM</span>
+                        <span id="ram-usage">0%</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span>Servers</span>
+                        <span id="server-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ml-64 min-h-screen">
+        <div class="p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        socket.on('connect', function() {
+            console.log('Connected to CrazeDyn Panel');
+        });
+
+        socket.on('stats_update', function(data) {
+            // Update system stats in sidebar
+            if (data.system) {
+                document.getElementById('cpu-usage').textContent = data.system.cpu.toFixed(1) + '%';
+                document.getElementById('ram-usage').textContent = data.system.memory.percent.toFixed(1) + '%';
+            }
+            
+            if (data.servers) {
+                document.getElementById('server-count').textContent = Object.keys(data.servers).length;
+                
+                // Update server status indicators
+                updateServerStatuses(data.servers);
+            }
+        });
+
+        function updateServerStatuses(servers) {
+            for (const [name, stats] of Object.entries(servers)) {
+                const statusEl = document.getElementById(`status-${name}`);
+                if (statusEl) {
+                    statusEl.className = `status-indicator status-${stats.status}`;
+                    statusEl.textContent = stats.status.charAt(0).toUpperCase() + stats.status.slice(1);
+                }
+                
+                const playersEl = document.getElementById(`players-${name}`);
+                if (playersEl) {
+                    playersEl.textContent = stats.players;
+                }
+            }
+        }
+
+        // Utility functions
+        function showNotification(message, type = 'info') {
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg z-50 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 
+                'bg-blue-600'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function makeRequest(url, options = {}) {
+            // Automatically include CSRF token for all requests
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            
+            return fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    ...options.headers
+                },
+                ...options
+            }).then(response => response.json());
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CrazeDynPanel v2.0{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold neon-text">Dashboard v2.0</h1>
+            <p class="text-gray-400">Professional Server Management • Premium Edition</p>
+        </div>
+        <button id="create-server-btn" class="btn-primary">
+            <img src="/static/icons/buttons/create_server.png" alt="Create" class="w-4 h-4 mr-2" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'">
+            <i class="fas fa-plus mr-2" style="display: none;"></i>
+            Create Server
+        </button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="glass-card p-6 hover-lift transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm">Total Servers</p>
+                    <p class="text-2xl font-bold neon-text" id="total-servers">{{ servers|length }}</p>
+                </div>
+                <div class="text-3xl text-blue-400">
+                    <i class="fas fa-server"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 hover-lift transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm">Online Servers</p>
+                    <p class="text-2xl font-bold text-green-400" id="online-servers">0</p>
+                </div>
+                <div class="text-3xl text-green-400">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 hover-lift transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm">Total Players</p>
+                    <p class="text-2xl font-bold text-purple-400" id="total-players">0</p>
+                </div>
+                <div class="text-3xl text-purple-400">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 hover-lift transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 text-sm">System Load</p>
+                    <p class="text-2xl font-bold text-yellow-400" id="system-load">0%</p>
+                </div>
+                <div class="text-3xl text-yellow-400">
+                    <i class="fas fa-microchip"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Server List -->
+    <div class="glass-card p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Your Servers</h2>
+            <div class="flex space-x-2">
+                <button id="refresh-btn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-all">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <div id="servers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for name, server in servers.items() %}
+            <div class="server-card glass-card p-6 hover-lift transition-all" data-server="{{ name }}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold">{{ name }}</h3>
+                        <p class="text-gray-400 text-sm">Port: {{ server.port }}</p>
+                    </div>
+                    <div class="status-indicator status-offline" id="status-{{ name }}">
+                        Offline
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p class="text-xs text-gray-400">Players</p>
+                        <p class="font-bold" id="players-{{ name }}">0</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">RAM</p>
+                        <p class="font-bold">{{ server.min_ram }}-{{ server.max_ram }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button onclick="startServer('{{ name }}')" class="bg-green-600 hover:bg-green-500 px-3 py-2 rounded text-sm transition-all">
+                        <i class="fas fa-play mr-1"></i>Start
+                    </button>
+                    <button onclick="stopServer('{{ name }}')" class="bg-red-600 hover:bg-red-500 px-3 py-2 rounded text-sm transition-all">
+                        <i class="fas fa-stop mr-1"></i>Stop
+                    </button>
+                    <button onclick="manageServer('{{ name }}')" class="bg-blue-600 hover:bg-blue-500 px-3 py-2 rounded text-sm transition-all">
+                        <i class="fas fa-cog mr-1"></i>Manage
+                    </button>
+                    <button onclick="deleteServer('{{ name }}')" class="bg-red-700 hover:bg-red-600 px-3 py-2 rounded text-sm transition-all">
+                        <i class="fas fa-trash mr-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not servers %}
+        <div class="text-center py-12">
+            <div class="text-6xl text-gray-600 mb-4">
+                <i class="fas fa-server"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">No Servers Yet</h3>
+            <p class="text-gray-400 mb-6">Create your first server to get started!</p>
+            <button onclick="showCreateServerModal()" class="btn-primary">
+                <i class="fas fa-plus mr-2"></i>Create Your First Server
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Server Modal -->
+<div id="create-server-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="glass-card p-8 max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold neon-text">Create New Server</h2>
+            <button onclick="hideCreateServerModal()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="create-server-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Server Name</label>
+                <input type="text" id="server-name" required 
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Minecraft Version</label>
+                <select id="server-version" required 
+                        class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                    <option value="">Loading versions...</option>
+                </select>
+                <div class="mt-2 text-xs text-gray-400">
+                    <span id="version-info">Select a version to see download link</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Min RAM (GB)</label>
+                    <input type="number" id="min-ram" value="2" min="1" max="32" required
+                           class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Max RAM (GB)</label>
+                    <input type="number" id="max-ram" value="4" min="1" max="32" required
+                           class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Server Port</label>
+                <input type="number" id="server-port" value="25565" min="1024" max="65535" required
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Storage Limit (GB)</label>
+                <input type="number" id="storage-limit" value="10" min="1" max="100" required
+                       class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="flex items-center">
+                    <input type="checkbox" id="install-plugins" class="mr-2">
+                    <span class="text-sm">Install basic plugin pack</span>
+                </label>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3">
+                <label class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="enable-playit" class="mr-2">
+                        <span class="text-sm font-medium">🌐 Enable Playit.gg Remote Access</span>
+                    </div>
+                    <span id="playit-status" class="text-xs font-bold">❌ Not Installed</span>
+                </label>
+                <p class="text-xs text-gray-400 mt-1 ml-6">Make your server accessible worldwide through Playit.gg tunneling</p>
+            </div>
+
+            <div class="flex space-x-4 pt-4">
+                <button type="button" onclick="hideCreateServerModal()" 
+                        class="flex-1 bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-lg transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 btn-primary">
+                    <i class="fas fa-rocket mr-2"></i>Create Server
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Server management functions
+    function startServer(name) {
+        makeRequest(`/api/server/${name}/start`, { method: 'POST' })
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Starting server ${name}...`, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            });
+    }
+
+    function stopServer(name) {
+        makeRequest(`/api/server/${name}/stop`, { method: 'POST' })
+            .then(data => {
+                if (data.success) {
+                    showNotification(`Stopping server ${name}...`, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            });
+    }
+
+    function manageServer(name) {
+        window.location.href = `/server/${name}`;
+    }
+
+    // Load Paper versions
+    let paperVersions = [];
+    
+    async function loadPaperVersions() {
+        try {
+            const response = await fetch('/api/paper/versions');
+            const data = await response.json();
+            
+            if (data.success) {
+                paperVersions = data.versions;
+                const versionSelect = document.getElementById('server-version');
+                versionSelect.innerHTML = '';
+                
+                data.versions.forEach(version => {
+                    const option = document.createElement('option');
+                    option.value = version.version;
+                    option.textContent = version.version + (version.version === data.latest ? ' (Latest)' : '');
+                    versionSelect.appendChild(option);
+                });
+                
+                // Set default to latest
+                versionSelect.value = data.latest;
+                updateVersionInfo(data.latest);
+            }
+        } catch (error) {
+            console.error('Error loading versions:', error);
+            // Fallback to basic versions
+            const versionSelect = document.getElementById('server-version');
+            versionSelect.innerHTML = `
+                <option value="1.21.8">1.21.8 (Latest)</option>
+                <option value="1.21.3">1.21.3</option>
+                <option value="1.20.1">1.20.1</option>
+                <option value="1.19.4">1.19.4</option>
+            `;
+        }
+    }
+    
+    function updateVersionInfo(version) {
+        const versionData = paperVersions.find(v => v.version === version);
+        const infoElement = document.getElementById('version-info');
+        
+        if (versionData) {
+            infoElement.innerHTML = `
+                Paper ${version} • 
+                <a href="${versionData.download_url}" target="_blank" class="text-blue-400 hover:text-blue-300 underline">
+                    <i class="fas fa-download mr-1"></i>Download JAR
+                </a>
+            `;
+        } else {
+            infoElement.textContent = 'Select a version to see download link';
+        }
+    }
+
+    // Modal functions
+    function showCreateServerModal() {
+        document.getElementById('create-server-modal').classList.remove('hidden');
+        loadPaperVersions(); // Load versions when modal opens
+    }
+
+    function hideCreateServerModal() {
+        document.getElementById('create-server-modal').classList.add('hidden');
+    }
+
+    // Event listeners
+    document.getElementById('create-server-btn').addEventListener('click', showCreateServerModal);
+    document.getElementById('refresh-btn').addEventListener('click', () => location.reload());
+
+    // Handle version selection change
+    document.getElementById('server-version').addEventListener('change', function(e) {
+        updateVersionInfo(e.target.value);
+    });
+
+    document.getElementById('create-server-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('server-name').value,
+            version: document.getElementById('server-version').value,
+            min_ram: document.getElementById('min-ram').value + 'G',
+            max_ram: document.getElementById('max-ram').value + 'G',
+            port: parseInt(document.getElementById('server-port').value),
+            storage_limit: parseInt(document.getElementById('storage-limit').value),
+            storage_path: './servers',
+            install_plugins: document.getElementById('install-plugins').checked
+        };
+
+        makeRequest('/api/server/create', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        }).then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                hideCreateServerModal();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification(data.message, 'error');
+            }
+        });
+    });
+
+    function deleteServer(name) {
+        if (!confirm(`Are you sure you want to delete server "${name}"? This action cannot be undone.`)) {
+            return;
+        }
+        
+        fetch(`/api/server/${name}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                // Remove the server card from UI immediately
+                const serverCard = document.querySelector(`[data-server="${name}"]`);
+                if (serverCard) {
+                    serverCard.style.opacity = '0';
+                    setTimeout(() => serverCard.remove(), 300);
+                }
+                // Update totals
+                setTimeout(() => {
+                    const totalServers = document.getElementById('total-servers');
+                    if (totalServers) {
+                        totalServers.textContent = parseInt(totalServers.textContent) - 1;
+                    }
+                }, 300);
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Failed to delete server - Please try again', 'error');
+            console.error('Delete server error:', error);
+        });
+    }
+
+    // Update stats on page load
+    socket.on('stats_update', function(data) {
+        if (data.system) {
+            document.getElementById('system-load').textContent = data.system.cpu.toFixed(1) + '%';
+        }
+        
+        if (data.servers) {
+            let onlineCount = 0;
+            let totalPlayers = 0;
+            
+            for (const [name, stats] of Object.entries(data.servers)) {
+                if (stats.status === 'running') onlineCount++;
+                totalPlayers += stats.players;
+            }
+            
+            document.getElementById('online-servers').textContent = onlineCount;
+            document.getElementById('total-players').textContent = totalPlayers;
+        }
+    });
+</script>
+{% endblock %}
