@@ -1,0 +1,6 @@
+
+miniupnpc
+flask
+flask-socketio
+gunicorn
+bcrypt
